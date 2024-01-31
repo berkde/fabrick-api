@@ -2,12 +2,12 @@
 
 ### AccountBalanceRestMapper Documentation
 
-| **Overview** | The `AccountBalanceRestMapper` class is a Spring `@Component` responsible for mapping an `AccountBalanceDTO` to an `AccountBalanceRest` and saving new Transactions to the database. It implements the `Function` interface. |
-| --- |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Class Structure** | - **Package**: `com.service.fabrickapi.mapper`<br>- **Author**: Berk Delibalta                                                                                                                                               |
-| **Mapping Logic** | 1. **Input Type**: `AccountBalanceDTO`<br>2. **Output Type**: `AccountBalanceRest`                                                                                                                                           |
-| **License** | MIT License                                                                                                                                                                                                                  |
-| **Copyright** | Copyright (c) 2024 Berk Delibalta                                                                                                                                                                                            |
+| **Overview** | The `AccountBalanceRestMapper` class is a Spring `@Component` responsible for mapping an `AccountBalanceDTO` to an `AccountBalanceRest`. It implements the `Function` interface. |
+| --- | --- |
+| **Class Structure** | - **Package**: `com.service.fabrickapi.mapper`<br>- **Author**: Berk Delibalta |
+| **Mapping Logic** | 1. **Input Type**: `AccountBalanceDTO`<br>2. **Output Type**: `AccountBalanceRest` |
+| **License** | MIT License |
+| **Copyright** | Copyright (c) 2024 Berk Delibalta |
 
 ---
 

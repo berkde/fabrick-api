@@ -43,6 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Function;
 
 import static com.service.fabrickapi.model.error.ErrorMessages.INVALID_JSON_ERROR;
 
@@ -208,5 +209,6 @@ public class Utils {
             throw new FabrickRestServiceException(ErrorMessages.INVALID_JSON_ERROR.getMessage());
         }
     }
+
 
 }
