@@ -2,7 +2,7 @@
 
 
 
-The Fabrick API Integration Project is a comprehensive Java-based solution designed to seamlessly interact with the Fabrick API, facilitating the retrieval and manipulation of account and transaction information. This project encapsulates various components such as configurations, controllers, entities, exceptions, mappers, models, repositories, services, and utility classes to create a robust and efficient API integration system.
+The Fabrick API Project is a comprehensive Java-based solution designed to seamlessly interact with the Fabrick API, facilitating the retrieval and manipulation of account and transaction information. This project encapsulates various components such as configurations, controllers, entities, exceptions, mappers, models, repositories, services, and utility classes to create a robust and efficient API integration system.
 
 ## Key Features:
 
@@ -54,7 +54,7 @@ This Fabrick API Integration Project simplifies the integration process, offerin
 
 I apologize for any confusion. Here's the corrected guide, emphasizing the need to clone the project to the local environment for development:
 
-# Fabrick API Integration Project Setup Guide
+# Fabrick API Project Setup Guide
 
 To contribute to and work on the Fabrick API Integration Project, follow these step-by-step instructions:
 
@@ -87,7 +87,6 @@ To contribute to and work on the Fabrick API Integration Project, follow these s
 
 4. **Set Up the Database:**
    - Configure your MySQL database settings in the `application.properties` file.
-   - Run the SQL scripts provided in the `db-scripts` folder to set up the necessary tables.
 
 
 
@@ -119,7 +118,7 @@ To contribute to and work on the Fabrick API Integration Project, follow these s
      ```
    - Pull changes from the original repository before pushing your changes:
      ```bash
-     git pull upstream main
+     git pull upstream master
      ```
 
 ---
