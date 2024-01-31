@@ -124,6 +124,10 @@ To contribute to and work on the Fabrick API Integration Project, follow these s
 
 ---
 
+[![Java CI with Maven](https://github.com/bd97it/fabrick-api/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/bd97it/fabrick-api/actions/workflows/ci-cd.yml)
+
+---
+
 ## License
 
 MIT License
