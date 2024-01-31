@@ -24,14 +24,11 @@
 
 package com.service.fabrickapi.service.implementation;
 
-import com.service.fabrickapi.entity.TransactionEntity;
 import com.service.fabrickapi.exception.AccountServiceException;
 import com.service.fabrickapi.mapper.AccountBalancerRestMapper;
 import com.service.fabrickapi.mapper.TransactionRestMapper;
-import com.service.fabrickapi.model.dto.AccountBalanceDTO;
 import com.service.fabrickapi.model.rest.AccountBalanceRest;
 import com.service.fabrickapi.model.rest.TransactionRest;
-import com.service.fabrickapi.repository.TransactionRepository;
 import com.service.fabrickapi.service.AccountService;
 import com.service.fabrickapi.service.FabrickRestService;
 import org.slf4j.Logger;
@@ -51,7 +48,6 @@ public class AccountServiceImpl implements AccountService {
     private final FabrickRestService fabrickRestService;
     private final AccountBalancerRestMapper accountBalancerRestMapper;
     private final TransactionRestMapper transactionRestMapper;
-    private final TransactionRepository transactionRepository;
 
     /**
      * Constructs a new instance of the AccountServiceImpl.
@@ -59,7 +55,6 @@ public class AccountServiceImpl implements AccountService {
      * @param fabrickRestService        The FabrickRestService instance to use for making REST API calls.
      * @param accountBalancerRestMapper The AccountBalancerRestMapper instance to use for mapping AccountBalanceDTO objects to AccountBalanceRest objects.
      * @param transactionRestMapper     The TransactionRestMapper instance to use for mapping TransactionDTO objects to TransactionRest objects.
-     * @param transactionRepository     The TransactionRepository instance to use for persisting Transaction objects.
      * @implNote The AccountServiceImpl constructor is annotated with @Autowired to inject the FabrickRestService,
      * AccountBalancerRestMapper, and TransactionRestMapper instances.
      * This allows the AccountServiceImpl to access the FabrickRestService and
@@ -68,12 +63,10 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     public AccountServiceImpl(FabrickRestService fabrickRestService,
                               AccountBalancerRestMapper accountBalancerRestMapper,
-                              TransactionRestMapper transactionRestMapper,
-                              TransactionRepository transactionRepository) {
+                              TransactionRestMapper transactionRestMapper) {
         this.fabrickRestService = fabrickRestService;
         this.accountBalancerRestMapper = accountBalancerRestMapper;
         this.transactionRestMapper = transactionRestMapper;
-        this.transactionRepository = transactionRepository;
     }
 
     /**
@@ -130,31 +123,7 @@ public class AccountServiceImpl implements AccountService {
                         return new AccountServiceException(RECORD_NOT_FOUND.getMessage());
                     })
                     .stream()
-                    .map(transactionDTO -> {
-                        LOG.info("MAPPING TRANSACTION DTO OBJECT {}", transactionDTO);
-                        TransactionRest transactionRest = transactionRestMapper.apply(transactionDTO);
-
-                        boolean isTransactionExist = transactionRepository.findByTransactionId(transactionRest.transactionId()).isPresent();
-                        if (!isTransactionExist) {
-                            LOG.info("TRANSACTION REGISTRATION TO DB STARTED");
-
-                            TransactionEntity transactionEntity = new TransactionEntity();
-                            transactionEntity.setTransactionId(transactionRest.transactionId());
-                            transactionEntity.setOperationId(transactionRest.operationId());
-                            transactionEntity.setAccountingDate(transactionRest.accountingDate());
-                            transactionEntity.setValueDate(transactionRest.valueDate());
-                            transactionEntity.setType(transactionRest.type().toString());
-                            transactionEntity.setAmount(transactionRest.amount());
-                            transactionEntity.setCurrency(transactionRest.currency());
-                            transactionEntity.setDescription(transactionRest.description());
-                            transactionRepository.save(transactionEntity);
-
-                            LOG.info("TRANSACTION REGISTRATION ENDED");
-                        }
-
-                        LOG.info("RETURNING TRANSACTION REST OBJECT {}", transactionRest);
-                        return transactionRest;
-                    })
+                    .map(transactionRestMapper)
                     .sorted(Comparator.comparing(TransactionRest::accountingDate).thenComparing(TransactionRest::valueDate).reversed())
                     .limit(30)
                     .toList();

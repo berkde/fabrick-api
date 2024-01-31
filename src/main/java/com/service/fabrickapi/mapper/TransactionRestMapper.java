@@ -26,17 +26,32 @@
 
 package com.service.fabrickapi.mapper;
 
+import com.service.fabrickapi.entity.TransactionEntity;
 import com.service.fabrickapi.model.dto.TransactionDTO;
 import com.service.fabrickapi.model.rest.TransactionRest;
+import com.service.fabrickapi.repository.TransactionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 @Component
 public class TransactionRestMapper implements Function<TransactionDTO, TransactionRest> {
+    private final Logger LOG = LoggerFactory.getLogger(TransactionRestMapper.class);
+
+    private final TransactionRepository transactionRepository;
+
+    @Autowired
+    public TransactionRestMapper(TransactionRepository transactionRepository) {
+        this.transactionRepository = transactionRepository;
+    }
+
     @Override
     public TransactionRest apply(TransactionDTO transactionDTO) {
-        return new TransactionRest(
+        TransactionRest transactionRest = new TransactionRest(
                 Long.valueOf(transactionDTO.transactionId()),
                 Long.valueOf(transactionDTO.operationId()),
                 transactionDTO.accountingDate(),
@@ -46,5 +61,26 @@ public class TransactionRestMapper implements Function<TransactionDTO, Transacti
                 transactionDTO.currency(),
                 transactionDTO.description()
         );
+
+        boolean isTransactionExist = transactionRepository.findByTransactionId(transactionRest.transactionId()).isPresent();
+        if (!isTransactionExist) {
+            LOG.info("TRANSACTION REGISTRATION TO DB STARTED");
+            saveTransaction(transactionRest);
+        }
+
+        return transactionRest;
+    }
+
+    private void saveTransaction(TransactionRest transactionRest) {
+        TransactionEntity transactionEntity = new TransactionEntity();
+        transactionEntity.setTransactionId(transactionRest.transactionId());
+        transactionEntity.setOperationId(transactionRest.operationId());
+        transactionEntity.setAccountingDate(transactionRest.accountingDate());
+        transactionEntity.setValueDate(transactionRest.valueDate());
+        transactionEntity.setType(transactionRest.type().toString());
+        transactionEntity.setAmount(transactionRest.amount());
+        transactionEntity.setCurrency(transactionRest.currency());
+        transactionEntity.setDescription(transactionRest.description());
+        transactionRepository.save(transactionEntity);
     }
 }
