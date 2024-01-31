@@ -1,4 +1,4 @@
-```markdown
+
 # Security Policy
 
 ## Reporting a Security Issue
@@ -58,4 +58,4 @@ Note: Users are encouraged to use the latest stable version to benefit from the 
 ## License
 
 By participating in this project, you agree to abide by its [license](LICENSE.md).
-```
+
