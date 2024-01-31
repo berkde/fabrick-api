@@ -33,6 +33,7 @@ import com.service.fabrickapi.model.dto.AccountBalanceDTO;
 import com.service.fabrickapi.model.dto.TransactionDTO;
 import com.service.fabrickapi.model.rest.AccountBalanceRest;
 import com.service.fabrickapi.model.rest.TransactionRest;
+import com.service.fabrickapi.repository.TransactionRepository;
 import com.service.fabrickapi.service.FabrickRestService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,6 +61,8 @@ class AccountServiceImplTest {
     FabrickRestService fabrickRestService;
     @Mock
     AccountBalancerRestMapper accountBalancerRestMapper;
+    @Mock
+    TransactionRepository transactionRepository;
     @Mock
     TransactionRestMapper transactionRestMapper;
     AccountBalanceDTO accountBalanceDTO;
@@ -181,6 +184,7 @@ class AccountServiceImplTest {
     void getAccountTransactions() {
         when(fabrickRestService.getAccountTransactions(anyLong(), anyString(), anyString())).thenReturn(Optional.of(List.of(transactionDTO)));
         when(transactionRestMapper.apply(any(TransactionDTO.class))).thenReturn(transactionRest);
+        when(transactionRestMapper.apply(any(TransactionDTO.class))).thenReturn(transactionRest);
 
         List<TransactionRest> transactionRests = accountService.getAccountTransactions(1L, "2019-11-01", "2019-12-29");
 
@@ -194,6 +198,7 @@ class AccountServiceImplTest {
         assertThat(transactionRests.getFirst().description()).isEqualTo("Sample Transaction");
 
         verify(fabrickRestService, times(1)).getAccountTransactions(anyLong(), anyString(), anyString());
+        verify(transactionRepository, times(1)).findByTransactionId(anyLong());
         verify(transactionRestMapper, times(1)).apply(any(TransactionDTO.class));
     }
 
