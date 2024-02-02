@@ -37,7 +37,6 @@ The `AccountServiceImpl` class is an implementation of the `AccountService` inte
 | `com.service.fabrickapi.model.rest.AccountBalanceRest` | Model class representing RESTful account balance information. |
 | `com.service.fabrickapi.model.rest.LoanTransferRest` | Model class representing RESTful loan transfer information. |
 | `com.service.fabrickapi.model.rest.TransactionRest` | Model class representing RESTful transaction information. |
-| `com.service.fabrickapi.repository.TransactionRepository` | Repository interface for managing transactions.   |
 | `com.service.fabrickapi.shared.Utils`               | Shared utility methods for various functionalities. |
 | `org.springframework.cache.annotation.CacheEvict`    | Annotation for evicting entries from a cache.        |
 | `org.springframework.cache.annotation.Cacheable`     | Annotation for caching the result of a method.       |
@@ -76,47 +75,19 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Cacheable(key = "accountId", value = "transactions")
     public List<TransactionRest> getAccountTransactions(Long accountId, String fromAccountingDate, String toAccountingDate) {
-        try {
-            return fabrickRestService
-                    .getAccountTransactions(accountId, fromAccountingDate, toAccountingDate)
-                    .orElseThrow(() -> {
-                        LOG.error("TRANSACTION REST OBJECT LIST IS NULL");
-                        return new AccountServiceException(RECORD_NOT_FOUND.getMessage());
-                    })
-                    .stream()
-                    .map(transactionDTO -> {
-                        LOG.info("MAPPING TRANSACTION DTO OBJECT {}", transactionDTO);
-                        TransactionRest transactionRest = transactionRestMapper.apply(transactionDTO);
-
-                        boolean isTransactionExist = transactionRepository.findByTransactionId(transactionRest.transactionId()).isPresent();
-                        if (!isTransactionExist) {
-                            LOG.info("TRANSACTION REGISTRATION TO DB STARTED");
-
-                            TransactionEntity transactionEntity = new TransactionEntity();
-                            transactionEntity.setTransactionId(transactionRest.transactionId());
-                            transactionEntity.setOperationId(transactionRest.operationId());
-                            transactionEntity.setAccountingDate(transactionRest.accountingDate());
-                            transactionEntity.setValueDate(transactionRest.valueDate());
-                            transactionEntity.setType(transactionRest.type().toString());
-                            transactionEntity.setAmount(transactionRest.amount());
-                            transactionEntity.setCurrency(transactionRest.currency());
-                            transactionEntity.setDescription(transactionRest.description());
-                            transactionRepository.save(transactionEntity);
-
-                            LOG.info("TRANSACTION REGISTRATION ENDED");
-                        }
-
-                        LOG.info("RETURNING TRANSACTION REST OBJECT {}", transactionRest);
-                        return transactionRest;
-                    })
-                    .sorted(Comparator.comparing(TransactionRest::accountingDate).thenComparing(TransactionRest::valueDate).reversed())
-                    .limit(30)
-                    .toList();
-        } catch (Exception e) {
-            LOG.error("TRANSACTION OBJECT TRANSFORM OR SAVE FAILED");
-            throw new AccountServiceException(e.getMessage());
-        }
+        return fabrickRestService
+                .getAccountTransactions(accountId, fromAccountingDate, toAccountingDate)
+                .orElseThrow(() -> new AccountServiceException(RECORD_NOT_FOUND.getMessage()))
+                .parallelStream()
+                .peek(transactionDTO -> LOG.info("MAPPING TRANSACTION DTO OBJECT {}", transactionDTO))
+                .map(transactionRestMapper)
+                .peek(transactionRest -> LOG.info("RETURNING TRANSACTION REST OBJECT {}", transactionRest))
+                .map(accountTransactionSaveMapper)
+                .sorted(Comparator.comparing(TransactionRest::accountingDate).thenComparing(TransactionRest::valueDate).reversed())
+                .limit(30)
+                .toList();
     }
+
     // Other methods and implementations are omitted for brevity
 }
 ```

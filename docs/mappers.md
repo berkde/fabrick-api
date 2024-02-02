@@ -11,6 +11,20 @@
 
 ---
 
+# AccountTransactionSaveMapper Documentation
+
+| **Overview** | The `AccountTransactionSaveMapper` class is a Spring `@Component` responsible for mapping a `TransactionRest` object to itself after saving it to a database. It implements the `Function` interface. |
+| --- | --- |
+| **Class Structure** | - **Package**: `com.service.fabrickapi.mapper`<br>- **Author**: Berk Delibalta |
+| **Dependencies** | - **Spring**: `@Component`, `@Autowired`<br>- **External**: `TransactionRepository` |
+| **Mapping Logic** | 1. **Input Type**: `TransactionRest`<br>2. **Output Type**: `TransactionRest` |
+| **Database Interaction** | The mapper interacts with a `TransactionRepository` to check if a transaction with the given `transactionId` already exists in the database. If not, it creates a new `TransactionEntity` and saves it to the database. |
+| **Logging** | The class uses SLF4J Logger (`LoggerFactory.getLogger`) for logging information about the transaction registration process. |
+| **License** | MIT License |
+| **Copyright** | Copyright (c) 2024 Berk Delibalta |
+
+---
+
 ### LoanTransferRestMapper Documentation
 
 | **Overview** | The `LoanTransferRestMapper` class is a Spring `@Component` responsible for mapping a `LoanTransferDTO` to a `LoanTransferRest`. It implements the `Function` interface. |
