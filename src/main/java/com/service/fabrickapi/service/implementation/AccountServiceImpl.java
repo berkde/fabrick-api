@@ -1,36 +1,37 @@
 /*
  *
- *  * Copyright (c) 2024 Berk Delibalta
  *  *
- *  * Permission is hereby granted, free of charge, to any person obtaining a copy
- *  * of this software and associated documentation files (the "Software"), to deal
- *  * in the Software without restriction, including without limitation the rights
- *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  * copies of the Software, and to permit persons to whom the Software is
- *  * furnished to do so, subject to the following conditions:
+ *  *  * Copyright (c) 2024 Berk Delibalta
+ *  *  *
+ *  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  *  * of this software and associated documentation files (the "Software"), to deal
+ *  *  * in the Software without restriction, including without limitation the rights
+ *  *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  *  * copies of the Software, and to permit persons to whom the Software is
+ *  *  * furnished to do so, subject to the following conditions:
+ *  *  *
+ *  *  * The above copyright notice and this permission notice shall be included in
+ *  *  * all copies or substantial portions of the Software.
+ *  *  *
+ *  *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  *  * THE SOFTWARE.
  *  *
- *  * The above copyright notice and this permission notice shall be included in
- *  * all copies or substantial portions of the Software.
- *  *
- *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- *  * THE SOFTWARE.
  *
  */
 
 package com.service.fabrickapi.service.implementation;
 
-import com.service.fabrickapi.entity.TransactionEntity;
 import com.service.fabrickapi.exception.AccountServiceException;
 import com.service.fabrickapi.mapper.AccountBalancerRestMapper;
+import com.service.fabrickapi.mapper.AccountTransactionSaveMapper;
 import com.service.fabrickapi.mapper.TransactionRestMapper;
 import com.service.fabrickapi.model.rest.AccountBalanceRest;
 import com.service.fabrickapi.model.rest.TransactionRest;
-import com.service.fabrickapi.repository.TransactionRepository;
 import com.service.fabrickapi.service.AccountService;
 import com.service.fabrickapi.service.FabrickRestService;
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ public class AccountServiceImpl implements AccountService {
     private final FabrickRestService fabrickRestService;
     private final AccountBalancerRestMapper accountBalancerRestMapper;
     private final TransactionRestMapper transactionRestMapper;
-    private final TransactionRepository transactionRepository;
+    private final AccountTransactionSaveMapper accountTransactionSaveMapper;
 
     /**
      * Constructs a new instance of the AccountServiceImpl.
@@ -58,7 +59,7 @@ public class AccountServiceImpl implements AccountService {
      * @param fabrickRestService        The FabrickRestService instance to use for making REST API calls.
      * @param accountBalancerRestMapper The AccountBalancerRestMapper instance to use for mapping AccountBalanceDTO objects to AccountBalanceRest objects.
      * @param transactionRestMapper     The TransactionRestMapper instance to use for mapping TransactionDTO objects to TransactionRest objects.
-     * @param transactionRepository     The TransactionRepository instance to use for persisting Transaction objects.
+     * @param accountTransactionSaveMapper The AccountTransactionSaveMapper instance to use for mapping AccountTransactionSave objects to TransactionRest objects.
      * @implNote The AccountServiceImpl constructor is annotated with @Autowired to inject the FabrickRestService,
      * AccountBalancerRestMapper, and TransactionRestMapper instances.
      * This allows the AccountServiceImpl to access the FabrickRestService and
@@ -68,11 +69,11 @@ public class AccountServiceImpl implements AccountService {
     public AccountServiceImpl(FabrickRestService fabrickRestService,
                               AccountBalancerRestMapper accountBalancerRestMapper,
                               TransactionRestMapper transactionRestMapper,
-                              TransactionRepository transactionRepository) {
+                              AccountTransactionSaveMapper accountTransactionSaveMapper) {
         this.fabrickRestService = fabrickRestService;
         this.accountBalancerRestMapper = accountBalancerRestMapper;
         this.transactionRestMapper = transactionRestMapper;
-        this.transactionRepository = transactionRepository;
+        this.accountTransactionSaveMapper = accountTransactionSaveMapper;
     }
 
     /**
@@ -121,47 +122,17 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Cacheable(key = "accountId", value = "transactions")
     public List<TransactionRest> getAccountTransactions(Long accountId, String fromAccountingDate, String toAccountingDate) {
-        try {
             return fabrickRestService
                     .getAccountTransactions(accountId, fromAccountingDate, toAccountingDate)
-                    .orElseThrow(() -> {
-                        LOG.error("TRANSACTION REST OBJECT LIST IS NULL");
-                        return new AccountServiceException(RECORD_NOT_FOUND.getMessage());
-                    })
-                    .stream()
-                    .map(transactionDTO -> {
-                        LOG.info("MAPPING TRANSACTION DTO OBJECT {}", transactionDTO);
-                        TransactionRest transactionRest = transactionRestMapper.apply(transactionDTO);
-
-                        boolean isTransactionExist = transactionRepository.findByTransactionId(transactionRest.transactionId()).isPresent();
-                        if (!isTransactionExist) {
-                            LOG.info("TRANSACTION REGISTRATION TO DB STARTED");
-
-                            TransactionEntity transactionEntity = new TransactionEntity();
-                            transactionEntity.setTransactionId(transactionRest.transactionId());
-                            transactionEntity.setOperationId(transactionRest.operationId());
-                            transactionEntity.setAccountingDate(transactionRest.accountingDate());
-                            transactionEntity.setValueDate(transactionRest.valueDate());
-                            transactionEntity.setType(transactionRest.type().toString());
-                            transactionEntity.setAmount(transactionRest.amount());
-                            transactionEntity.setCurrency(transactionRest.currency());
-                            transactionEntity.setDescription(transactionRest.description());
-                            transactionRepository.save(transactionEntity);
-
-                            LOG.info("TRANSACTION REGISTRATION ENDED");
-                        }
-
-                        LOG.info("RETURNING TRANSACTION REST OBJECT {}", transactionRest);
-                        return transactionRest;
-                    })
+                    .orElseThrow(() -> new AccountServiceException(RECORD_NOT_FOUND.getMessage()))
+                    .parallelStream()
+                    .peek(transactionDTO -> LOG.info("MAPPING TRANSACTION DTO OBJECT {}", transactionDTO))
+                    .map(transactionRestMapper)
+                    .peek(transactionRest -> LOG.info("RETURNING TRANSACTION REST OBJECT {}", transactionRest))
+                    .map(accountTransactionSaveMapper)
                     .sorted(Comparator.comparing(TransactionRest::accountingDate).thenComparing(TransactionRest::valueDate).reversed())
                     .limit(30)
                     .toList();
-        } catch (Exception e) {
-            LOG.error("TRANSACTION OBJECT TRANSFORM OR SAVE FAILED");
-            throw new AccountServiceException(e.getMessage());
-        }
     }
-
 
 }
