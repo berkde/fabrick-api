@@ -86,11 +86,6 @@ public class TransactionEntity {
                 Objects.equals(operationId, that.operationId);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, transactionId, operationId);
-    }
-
     public Long getId() {
         return id;
     }
