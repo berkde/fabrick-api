@@ -79,7 +79,7 @@ public class AccountIntegrationTest {
     }
 
     public static <T> List<T> deserializeXmlList(String xml, Class<T> valueType) throws IOException {
-        XmlMapper xmlMapper = new XmlMapper();
+        var xmlMapper = new XmlMapper();
         return xmlMapper.readValue(xml, xmlMapper.getTypeFactory().constructCollectionType(List.class, valueType));
     }
 
@@ -123,7 +123,7 @@ public class AccountIntegrationTest {
     void getAccountBalance() throws Exception {
         when(accountService.getAccountBalance(anyLong())).thenReturn(accountBalanceRest);
 
-        MvcResult result = mockMvc.perform(
+        var result = mockMvc.perform(
                         get("/api/v1/account/{accountId}/balance", 1234L)
                                 .content(MediaType.APPLICATION_JSON_VALUE)
                                 .accept(MediaType.APPLICATION_XML_VALUE))
@@ -131,7 +131,7 @@ public class AccountIntegrationTest {
 
 
         String xmlResponse = result.getResponse().getContentAsString();
-        AccountBalanceRest balanceRest = xmlMapper.readValue(xmlResponse, AccountBalanceRest.class);
+        var balanceRest = xmlMapper.readValue(xmlResponse, AccountBalanceRest.class);
 
         assertThat(balanceRest).isNotNull();
 
@@ -154,7 +154,7 @@ public class AccountIntegrationTest {
     void getAccountTransactions() throws Exception {
         when(accountService.getAccountTransactions(anyLong(), anyString(), anyString())).thenReturn(List.of(transactionRest));
 
-        MvcResult result = mockMvc.perform(
+        var result = mockMvc.perform(
                         get("/api/v1/account/{accountId}/transactions", 1234L)
                                 .param("fromAccountingDate", "2019-11-01")
                                 .param("toAccountingDate", "2019-12-01")
@@ -164,7 +164,7 @@ public class AccountIntegrationTest {
                 .andReturn();
 
         String xmlResponse = result.getResponse().getContentAsString();
-        List<TransactionRest> transactionRests = deserializeXmlList(xmlResponse, TransactionRest.class);
+        var transactionRests = deserializeXmlList(xmlResponse, TransactionRest.class);
 
         assertThat(transactionRests).isNotNull();
         assertThat(transactionRests.size()).isEqualTo(1);

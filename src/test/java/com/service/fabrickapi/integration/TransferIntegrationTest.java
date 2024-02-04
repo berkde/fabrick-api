@@ -138,7 +138,7 @@ public class TransferIntegrationTest {
     void transferLoan() throws Exception {
         when(transferService.transferLoan(anyLong(), any(LoanTransferRequest.class))).thenReturn(loanTransferRest);
 
-        MvcResult result = mockMvc.perform(
+        var result = mockMvc.perform(
                         post("/api/v1/transfer/{accountId}", 1234L)
                                 .content("""
                                         {
@@ -161,7 +161,7 @@ public class TransferIntegrationTest {
 
 
         String xmlResponse = result.getResponse().getContentAsString();
-        LoanTransferRest returnValue = xmlMapper.readValue(xmlResponse, LoanTransferRest.class);
+        var returnValue = xmlMapper.readValue(xmlResponse, LoanTransferRest.class);
 
         assertThat(returnValue).isNotNull();
 

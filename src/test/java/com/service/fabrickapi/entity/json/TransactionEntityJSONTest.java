@@ -36,6 +36,7 @@ import org.springframework.boot.test.json.JacksonTester;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Date;
 
 import static java.lang.Math.toIntExact;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,16 +50,15 @@ public class TransactionEntityJSONTest {
     private JacksonTester<TransactionEntity> transactionEntityJacksonTester;
     private TransactionEntity transactionEntity;
 
+    private Date testDate;
+
     @BeforeEach
     void setUp() {
         transactionEntity = new TransactionEntity();
-        transactionEntity.setId(1L);
         transactionEntity.setTransactionId(TRANSACTION_ID);
         transactionEntity.setOperationId(OPERATION_ID);
-        transactionEntity.setType(""" 
-                {"enumeration":"GBS_TRANSACTION_TYPE","value":"GBS_ACCOUNT_TRANSACTION_TYPE_0050"}
-                """);
-        transactionEntity.setAmount(BigDecimal.valueOf(343.77));
+        transactionEntity.setType("GBS_ACCOUNT_TRANSACTION_TYPE_0050");
+        transactionEntity.setAmount(new BigDecimal("343.77"));
         transactionEntity.setCurrency("EUR");
         transactionEntity.setDescription("PD VISA CORPORATE 10");
     }
@@ -66,16 +66,11 @@ public class TransactionEntityJSONTest {
     @Test
     @DisplayName("transaction entity serialize - json test ⚙️")
     public void testTransactionEntitySerialize() throws IOException {
+        System.err.println(transactionEntityJacksonTester.write(transactionEntity));
         String jsonTransactionEntitySerialize = """
-                 {
-                   "id": 1,
-                   "transactionId": 282831,
-                   "operationId": 282831,
-                   "type": "{\\"enumeration\\":\\"GBS_TRANSACTION_TYPE\\",\\"value\\":\\"GBS_ACCOUNT_TRANSACTION_TYPE_0050\\"}\\n",
-                   "amount": "343.77",
-                   "currency": "EUR",
-                   "description": "PD VISA CORPORATE 10"
-                 }
+                                
+                {"id":null,"transactionId":282831,"operationId":282831,"accountingDate":null,"valueDate":null,"type":"GBS_ACCOUNT_TRANSACTION_TYPE_0050","amount":"343.77","currency":"EUR","description":"PD VISA CORPORATE 10"}
+                                
                 """;
 
 
@@ -89,9 +84,7 @@ public class TransactionEntityJSONTest {
 
         assertThat(transactionEntityJacksonTester.write(transactionEntity)).extractingJsonPathNumberValue("$.transactionId").isEqualTo(toIntExact(TRANSACTION_ID));
         assertThat(transactionEntityJacksonTester.write(transactionEntity)).extractingJsonPathNumberValue("$.operationId").isEqualTo(toIntExact(OPERATION_ID));
-        assertThat(transactionEntityJacksonTester.write(transactionEntity)).extractingJsonPathStringValue("$.type").isEqualTo("""
-                {"enumeration":"GBS_TRANSACTION_TYPE","value":"GBS_ACCOUNT_TRANSACTION_TYPE_0050"}
-                """);
+        assertThat(transactionEntityJacksonTester.write(transactionEntity)).extractingJsonPathStringValue("$.type").isEqualTo("GBS_ACCOUNT_TRANSACTION_TYPE_0050");
         assertThat(transactionEntityJacksonTester.write(transactionEntity)).extractingJsonPathStringValue("$.amount").isEqualTo("343.77");
         assertThat(transactionEntityJacksonTester.write(transactionEntity)).extractingJsonPathStringValue("$.currency").isEqualTo("EUR");
 
@@ -101,26 +94,12 @@ public class TransactionEntityJSONTest {
     @Test
     @DisplayName("transaction entity deserialize - json test ⚙️")
     public void testTransactionEntityDeSerialize() throws Exception {
-        String jsonTransactionEntityDeserialize = "  {\n" +
-                "                   \"id\": 1,\n" +
-                "                   \"transactionId\": 282831,\n" +
-                "                   \"operationId\": 282831,\n" +
-                "                   \"accountingDate\": \"2019-11-28\",\n" +
-                "                   \"valueDate\": \"2019-11-30\",\n" +
-                "                   \"type\": \"{\\\"enumeration\\\":\\\"GBS_TRANSACTION_TYPE\\\",\\\"value\\\":\\\"GBS_ACCOUNT_TRANSACTION_TYPE_0050\\\"}\\n\",\n" +
-                "                   \"amount\": \"343.77\",\n" +
-                "                   \"currency\": \"EUR\",\n" +
-                "                   \"description\": \"PD VISA CORPORATE 10\"\n" +
-                "                 }";
+        String jsonTransactionEntityDeserialize = "{\"id\":null,\"transactionId\":282831,\"operationId\":282831,\"accountingDate\":null,\"valueDate\":null,\"type\":\"GBS_ACCOUNT_TRANSACTION_TYPE_0050\",\"amount\":\"343.77\",\"currency\":\"EUR\",\"description\":\"PD VISA CORPORATE 10\"} ";
 
         assertThat(transactionEntityJacksonTester.parse(jsonTransactionEntityDeserialize)).isEqualTo(transactionEntity);
         assertThat(transactionEntityJacksonTester.parseObject(jsonTransactionEntityDeserialize).getTransactionId()).isEqualTo(TRANSACTION_ID);
         assertThat(transactionEntityJacksonTester.parseObject(jsonTransactionEntityDeserialize).getOperationId()).isEqualTo(OPERATION_ID);
-        assertThat(transactionEntityJacksonTester.parseObject(jsonTransactionEntityDeserialize).getType()).isEqualTo(
-                """
-                        {"enumeration":"GBS_TRANSACTION_TYPE","value":"GBS_ACCOUNT_TRANSACTION_TYPE_0050"}
-                        """
-        );
+        assertThat(transactionEntityJacksonTester.parseObject(jsonTransactionEntityDeserialize).getType()).isEqualTo("GBS_ACCOUNT_TRANSACTION_TYPE_0050");
         assertThat(transactionEntityJacksonTester.parseObject(jsonTransactionEntityDeserialize).getAmount()).isEqualTo(BigDecimal.valueOf(343.77));
         assertThat(transactionEntityJacksonTester.parseObject(jsonTransactionEntityDeserialize).getCurrency()).isEqualTo("EUR");
         assertThat(transactionEntityJacksonTester.parseObject(jsonTransactionEntityDeserialize).getDescription()).isEqualTo("PD VISA CORPORATE 10");

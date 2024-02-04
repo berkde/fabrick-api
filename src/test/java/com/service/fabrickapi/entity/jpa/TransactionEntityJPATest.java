@@ -59,7 +59,7 @@ class TransactionEntityJPATest {
 
     @BeforeEach
     void setUp() {
-        TransactionEntity transactionEntity = new TransactionEntity();
+        var transactionEntity = new TransactionEntity();
         transactionEntity.setTransactionId(TRANSACTION_ID);
         transactionEntity.setOperationId(OPERATION_ID);
         transactionEntity.setAccountingDate(ACCOUNTING_DATE);
@@ -84,7 +84,7 @@ class TransactionEntityJPATest {
     @Test
     @DisplayName("save transaction entity and retrieve by transactionId - entity jpa test 🛠️")
     public void saveUserEntityAndRetrieveByUsername() {
-        Optional<TransactionEntity> transaction = this.transactionRepository.findByTransactionId(TRANSACTION_ID);
+        var transaction = this.transactionRepository.findByTransactionId(TRANSACTION_ID);
 
         assertThat(transaction).isNotNull();
         assertThat(transaction).isPresent();

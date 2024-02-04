@@ -146,7 +146,7 @@ class AccountServiceImplTest {
         when(fabrickRestService.getAccountBalance(anyLong())).thenReturn(Optional.ofNullable(accountBalanceDTO));
         when(accountBalancerRestMapper.apply(any(AccountBalanceDTO.class))).thenReturn(accountBalanceRest);
 
-        AccountBalanceRest returnValue = accountService.getAccountBalance(1L);
+        var returnValue = accountService.getAccountBalance(1L);
 
         assertThat(returnValue).isNotNull();
         assertThat(returnValue.accountId()).isEqualTo(1234567890L);
@@ -186,7 +186,7 @@ class AccountServiceImplTest {
         when(transactionRestMapper.apply(any(TransactionDTO.class))).thenReturn(transactionRest);
         when(accountTransactionSaveMapper.apply(any(TransactionRest.class))).thenReturn(transactionRest);
 
-        List<TransactionRest> transactionRests = accountService.getAccountTransactions(1L, "2019-11-01", "2019-12-29");
+        var transactionRests = accountService.getAccountTransactions(1L, "2019-11-01", "2019-12-29");
 
         assertThat(transactionRests).isNotEmpty();
         assertThat(transactionRests.getFirst().transactionId()).isEqualTo(123456789L);
