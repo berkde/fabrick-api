@@ -52,7 +52,7 @@ public class AccountTransactionSaveMapper implements Function<TransactionRest, T
         if (transactionRepository.findByTransactionId(transactionRest.transactionId()).isEmpty()) {
             LOG.info("TRANSACTION REGISTRATION TO DB STARTED");
 
-            TransactionEntity transactionEntity = new TransactionEntity();
+            var transactionEntity = new TransactionEntity();
             transactionEntity.setTransactionId(transactionRest.transactionId());
             transactionEntity.setOperationId(transactionRest.operationId());
             transactionEntity.setAccountingDate(transactionRest.accountingDate());
