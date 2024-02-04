@@ -42,6 +42,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/api/v1/transfer")
 public class TransferController {
@@ -107,7 +108,8 @@ public class TransferController {
                 accountId,
                 transferRequest.toString(),
                 Thread.currentThread().getName());
-        LoanTransferRest returnValue = transferService.transferLoan(accountId, transferRequest);
+        var returnValue = transferService.transferLoan(accountId, transferRequest);
         return new ResponseEntity<>(returnValue, new HttpHeaders(), HttpStatus.OK);
     }
+
 }

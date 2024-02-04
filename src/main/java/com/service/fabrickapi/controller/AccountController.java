@@ -103,7 +103,7 @@ public class AccountController {
         LOG.info("GET API ENDPOINT REQUEST | Account Balance - Account ID: {} - Requested By: {}",
                 accountId,
                 Thread.currentThread().getName());
-        AccountBalanceRest returnValue = accountService.getAccountBalance(accountId);
+        var returnValue = accountService.getAccountBalance(accountId);
         return new ResponseEntity<>(returnValue, new HttpHeaders(), HttpStatus.OK);
     }
 
@@ -164,7 +164,7 @@ public class AccountController {
                 fromAccountingDate,
                 toAccountingDate,
                 Thread.currentThread().getName());
-        List<TransactionRest> transactions = accountService.getAccountTransactions(accountId, fromAccountingDate, toAccountingDate);
+        var transactions = accountService.getAccountTransactions(accountId, fromAccountingDate, toAccountingDate);
         return ResponseEntity.ok(transactions);
     }
 }
