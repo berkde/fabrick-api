@@ -38,52 +38,52 @@ import java.util.Objects;
 public class TransactionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    Long id;
 
     @Column(name = "transaction_id", unique = true, nullable = false, updatable = false)
-    private Long transactionId;
+    Long transactionId;
 
     @Column(name = "operation_id", unique = true, nullable = false, updatable = false)
-    private Long operationId;
+    Long operationId;
 
     @Column(name = "accounting_date", nullable = false)
     @Temporal(TemporalType.DATE)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date accountingDate;
+    Date accountingDate;
 
     @Column(name = "value_date", nullable = false)
     @Temporal(TemporalType.DATE)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date valueDate;
+    Date valueDate;
 
     @Column(name = "type", nullable = false)
-    private String type;
+    String type;
 
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "0.00")
-    private BigDecimal amount;
+    BigDecimal amount;
 
 
     @Column(name = "currency", nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "0.00")
-    private String currency;
+    String currency;
 
 
     @Column(name = "description", nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "0.00")
-    private String description;
+    String description;
 
-    public TransactionEntity() {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TransactionEntity that = (TransactionEntity) o;
+        return Objects.equals(transactionId, that.transactionId) && Objects.equals(operationId, that.operationId);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        TransactionEntity that = (TransactionEntity) obj;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(transactionId, that.transactionId) &&
-                Objects.equals(operationId, that.operationId);
+    public int hashCode() {
+        return Objects.hash(transactionId, operationId);
     }
 
     public Long getId() {
