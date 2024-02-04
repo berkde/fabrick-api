@@ -105,8 +105,8 @@ public class FabrickRestServiceImpl implements FabrickRestService {
     @Override
     public Optional<List<TransactionDTO>> getAccountTransactions(Long accountId, String fromAccountingDate, String toAccountingDate) {
         try {
-            HttpHeaders headers = utils.headers();
-            HttpEntity<?> entity = new HttpEntity<>(headers);
+            var headers = utils.headers();
+            var entity = new HttpEntity<>(headers);
             String uri = utils.buildUrlWithQueryParams(credentials.transactionsURL(), accountId, fromAccountingDate, toAccountingDate);
 
             LOG.info("FETCHING TRANSACTIONS FOR  {} - FROM {} UNTIL {}",
@@ -114,7 +114,7 @@ public class FabrickRestServiceImpl implements FabrickRestService {
                     fromAccountingDate,
                     toAccountingDate);
 
-            ResponseEntity<String> response = utils.getStringResponseEntity(uri, entity, HttpMethod.GET);
+            var response = utils.getStringResponseEntity(uri, entity, HttpMethod.GET);
 
             String responseBody = response.getBody();
 
@@ -138,12 +138,12 @@ public class FabrickRestServiceImpl implements FabrickRestService {
     @Override
     public Optional<LoanTransferDTO> executeTransfer(Long accountId, LoanTransferRequest transferRequest) {
         try {
-            HttpHeaders headers = utils.headers();
+            var headers = utils.headers();
             String jsonRequest = utils.toJson(transferRequest);
 
             LOG.info("JSON REQUEST OBJECT {} ", jsonRequest);
 
-            HttpEntity<String> entity = new HttpEntity<>(jsonRequest, headers);
+            var entity = new HttpEntity<>(jsonRequest, headers);
             String uri = utils.buildUrl(credentials.transfersURL(), accountId);
 
             LOG.info("EXECUTING TRANSFER FROM REQUESTER {} FOR {} {}",
@@ -151,7 +151,7 @@ public class FabrickRestServiceImpl implements FabrickRestService {
                     transferRequest.amount(),
                     transferRequest.currency());
 
-            ResponseEntity<String> response = utils.getStringResponseEntity(uri, entity, HttpMethod.POST);
+            var response = utils.getStringResponseEntity(uri, entity, HttpMethod.POST);
 
             return Optional.ofNullable(utils.fromJson(response.getBody(), LoanTransferDTO.class));
 
